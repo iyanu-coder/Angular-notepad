@@ -1,0 +1,265 @@
+import { Component, AfterViewChecked, ViewChild } from '@angular/core';
+import { DataService } from './data.service';
+import { Note } from './note';
+
+@Component({
+  selector: 'addnote',
+  template: `
+
+  <h3>Ajout d'une note</h3><br />
+  <form #noteForm="ngForm" *ngIf="active" (ngSubmit)='SaveNote()'>
+    <div class="form-group col-md-8 col-md-offset-2">
+      <label for="title">Titre:</label>
+      <input type='text' [(ngModel)]="note.title" class='form-control' id='title' name='title' required minlength="4">
+      <div *ngIf="formErrors.title" class="alert alert-danger">
+        {{formErrors.title}}
+      </div>
+    </div>
+    <label>Catégorie:</label>
+    <select [(ngModel)]="note.category" class="form-control" id="category">
+      <option>Test</option>
+      <option>Cuisine</option>
+    </select>
+
+    <label>Date:</label>
+    <input type='text' [(ngModel)]="note.date" class='form-control' id='date' required/>
+
+    <label>Contenu:</label>
+    <textarea [(ngModel)]="note.content" class='form-control' id='content' rows="5" required></textarea>
+
+      <button type="submit" class="btn btn-success" [disabled]="!noteForm.form.valid" id='btnSave'>Sauvegarder</button>
+  </form>
+  `,
+  providers: [DataService]
+})
+
+export class HeroFormTemplate2Component implements AfterViewChecked {
+
+  categories = ['Test', 'Cuisine', 'Jardinage'];
+
+  note = new Note(4, 'This is a test title', '2017-05-08' , 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', this.categories[0]);
+
+  submitted = false;
+
+  SaveNote() {
+    this.submitted = true;
+  }
+
+  // Reset the form with a new hero AND restore 'pristine' class state
+  // by toggling 'active' flag which causes the form
+  // to be removed/re-added in a tick via NgIf
+  // TODO: Workaround until NgForm has a reset method (#6822)
+  active = true;
+
+  addNote() {
+    this.note = new Note(42,'' , '', '');
+
+    this.active = false;
+    setTimeout(() => this.active = true, 0);
+  }
+
+  noteForm: NgForm;
+  @ViewChild('noteForm') currentForm: NgForm;
+
+  ngAfterViewChecked() {
+    this.formChanged();
+  }
+
+  formChanged() {
+    if (this.currentForm === this.noteForm) { return; }
+    this.noteForm = this.currentForm;
+    if (this.noteForm) {
+      this.noteForm.valueChanges
+        .subscribe(data => this.onValueChanged(data));
+    }
+  }
+
+  onValueChanged(data?: any) {
+    if (!this.noteForm) { return; }
+    const form = this.noteForm.form;
+
+    for (const field in this.formErrors) {
+      // clear previous error message (if any)
+      this.formErrors[field] = '';
+      const control = form.get(field);
+
+      if (control && control.dirty && !control.valid) {
+        const messages = this.validationMessages[field];
+        for (const key in control.errors) {
+          this.formErrors[field] += messages[key] + ' ';
+        }
+      }
+    }
+  }
+
+  formErrors = {
+    'title': '',
+    'date':'',
+    'content':''
+  };
+
+  validationMessages = {
+    'title': {
+      'required':      'Champ obligatoire',
+      'minlength':     'Le titre doit contenir au moins 4 caractères',
+    },
+    'date': {
+      'required': 'Entrer une date'
+    },
+    'content': {
+      'required': 'Entrer une note'
+    }
+  };
+}
+
+
+
+=========================
+
+
+
+import { Component, AfterViewChecked, ViewChild } from '@angular/core';
+import { DataService } from './data.service';
+import { Note } from './note';
+
+@Component({
+  selector: 'addnote',
+  template: `
+
+  <div class="container">
+    <div [hidden]="submitted">
+      <h1>Ajout d'une note</h1>
+      <form #noteForm="ngForm"  *ngIf="active"  (ngSubmit)="SaveNote()">
+        <div class="form-group">
+          <label for="title">Titre</label>
+
+          <input type="text" id="title" class="form-control"
+                 required minlength="4" name="title" [(ngModel)]="note.title" >
+
+          <div *ngIf="formErrors.title" class="alert alert-danger">
+            {{ formErrors.title }}
+          </div>
+        </div>
+        <!--Date-->
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input type="text" id="date" class="form-control"
+                 required name="date"
+                 [(ngModel)]="note.date" >
+
+          <div *ngIf="formErrors.title" class="alert alert-danger">
+             {{ formErrors.date }}
+          </div>
+        </div>
+        <!--Category-->
+        <div class="form-group">
+          <label for="category">Catégorie</label>
+          <select id="category" class="form-control"
+                  name="category"
+                  [(ngModel)]="note.category" required >
+            <option *ngFor="let c of categories" [value]="c">{{c}}</option>
+          </select>
+
+          <div *ngIf="formErrors.category" class="alert alert-danger">
+            {{ formErrors.category }}
+          </div>
+        </div>
+        <!--Content-->
+        <div class="form-group">
+          <label for="content">Contenu de la note</label>
+          <textarea id="content" class="form-control"
+                required name="content"
+                 [(ngModel)]="note.content" >
+
+          <div *ngIf="formErrors.content" class="alert alert-danger">
+             {{ formErrors.content }}
+          </div>
+        </div>
+        <button type="submit" class="btn btn-default"
+               [disabled]="!noteForm.form.valid">Sauvegarder</button>
+        <button type="button" class="btn btn-default"
+               (click)="addNote()">Nouvelle note</button>
+      </form>
+    </div>
+
+    <note-submitted [note]="note" [(submitted)]="submitted"></note-submitted>
+  </div>
+
+  `,
+  providers: [DataService]
+})
+
+export class AddNoteComponent implements AfterViewChecked {
+
+  categories = ['Test', 'Cuisine', 'Jardinage'];
+
+  note = new Note(4, 'This is a test title', '2017-05-08' , 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', this.categories[0]);
+
+  submitted = false;
+
+  SaveNote() {
+    this.submitted = true;
+  }
+
+  active = true;
+
+  addNote() {
+    this.note = new Note(42,'' , '', '');
+
+    this.active = false;
+    setTimeout(() => this.active = true, 0);
+  }
+
+  noteForm: NgForm;
+  @ViewChild('noteForm') currentForm: NgForm;
+
+  ngAfterViewChecked() {
+    this.formChanged();
+  }
+
+  formChanged() {
+    if (this.currentForm === this.noteForm) { return; }
+    this.noteForm = this.currentForm;
+    if (this.noteForm) {
+      this.noteForm.valueChanges
+        .subscribe(data => this.onValueChanged(data));
+    }
+  }
+
+  onValueChanged(data?: any) {
+    if (!this.noteForm) { return; }
+    const form = this.noteForm.form;
+
+    for (const field in this.formErrors) {
+      // clear previous error message (if any)
+      this.formErrors[field] = '';
+      const control = form.get(field);
+
+      if (control && control.dirty && !control.valid) {
+        const messages = this.validationMessages[field];
+        for (const key in control.errors) {
+          this.formErrors[field] += messages[key] + ' ';
+        }
+      }
+    }
+  }
+
+  formErrors = {
+    'title': '',
+    'date':'',
+    'content':''
+  };
+
+  validationMessages = {
+    'title': {
+      'required':      'Champ obligatoire',
+      'minlength':     'Le titre doit contenir au moins 4 caractères',
+    },
+    'date': {
+      'required': 'Entrer une date'
+    },
+    'content': {
+      'required': 'Entrer une note'
+    }
+  };
+}

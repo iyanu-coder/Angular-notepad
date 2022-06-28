@@ -1,0 +1,36 @@
+<div class="jumbotron">
+   <h2>Akin Notepad</h2>
+   <form [formGroup]="noteForm" (ngSubmit)="submitForm(noteForm.value)">
+
+     <div class="form-group" [ngClass]="{'has-error':!noteForm.controls['title'].valid && noteForm.controls['title'].touched}">
+       <label>Titre:</label>
+       <input class="form-control" type="text" placeholder="" [formControl]="noteForm.controls['title']">
+       <div class="alert alert-danger" *ngIf="!noteForm.controls['title'].valid && noteForm.controls['title'].touched">Veuillez introduire un titre avec mininum 4 caractères</div>
+     </div>
+
+     <div class="form-group" [ngClass]="{'has-error':!noteForm.controls['date'].valid && noteForm.controls['date'].touched}">
+       <label>Date:</label>
+       <input class="form-control" type="text" placeholder="YYYY-MM-DD" [formControl]="noteForm.controls['date']">
+       <div class="alert alert-danger" *ngIf="!noteForm.controls['date'].valid && noteForm.controls['date'].touched">Date requise, Exemple: 2017-05-11</div>
+     </div>
+
+     <div class="form-group" [ngClass]="{'has-error':!noteForm.controls['category'].valid && noteForm.controls['category'].touched}">
+       <label>Catégorie:</label>
+       <select id="category" class="form-control" name="category" [formControl]="noteForm.controls['category']">
+         <option *ngFor="let c of categories" [value]="c">{{c.name}}</option>
+       </select>
+       <div class="alert alert-danger" *ngIf="!noteForm.controls['category'].valid && noteForm.controls['category'].touched">Veuillez sélectionner une catégorie</div>
+     </div>
+
+     <div class="form-group" [ngClass]="{'has-error':!noteForm.controls['content'].valid && noteForm.controls['content'].touched}">
+       <label>Contenu de la note:</label>
+       <textarea rows="5" class="form-control" type="text" placeholder="" [formControl]="noteForm.controls['content']"></textarea>
+       <div class="alert alert-danger" *ngIf="!noteForm.controls['content'].valid && noteForm.controls['content'].touched">Contenu vide, veuillez remplir le contenu de la note!</div>
+     </div>
+
+     <div class="form-group">
+       <button type="submit" class="btn btn-primary" [disabled]="!noteForm.valid">Sauvegarder</button>
+       <div class="alert alert-success" *ngIf="successSave">Note enregistrée avec succés!</div>
+     </div>
+   </form>
+ </div>
